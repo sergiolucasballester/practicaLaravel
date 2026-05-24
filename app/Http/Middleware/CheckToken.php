@@ -9,26 +9,17 @@ class CheckToken
 {
     public function handle(Request $request, Closure $next)
     {
-        $token = $request->bearerToken();
-
-        if (!$token) {
+        $user = $request->user('api');
+        
+        if (!$user) {
             return response()->json([
-                'error' => 'No autenticado. Token no proporcionado.'
+                'error' => 'No autenticado. Token inválido o no proporcionado.'
             ], 401);
         }
 
-        $tokenHash = hash('sha256', $token);
-
-        $personalToken = \Laravel\Sanctum\PersonalAccessToken::where('token', $tokenHash)->first();
-
-        if (!$personalToken) {
-            return response()->json([
-                'error' => 'No autenticado. Token inválido.'
-            ], 401);
-        }
-
-        $request->setUserResolver(function () use ($personalToken) {
-            return $personalToken->tokenable;
+        // Establecer el usuario para que $request->user() funcione en los controladores
+        $request->setUserResolver(function () use ($user) {
+            return $user;
         });
 
         return $next($request);

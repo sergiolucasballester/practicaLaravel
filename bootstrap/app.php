@@ -3,6 +3,8 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Auth\AuthenticationException;
+use Illuminate\Http\Request;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -16,6 +18,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'check.token' => \App\Http\Middleware\CheckToken::class,
         ]);
     })
-    ->withExceptions(function (Exceptions $exceptions): void {
-        //
+    ->withExceptions(function (Exceptions $exceptions) {
+        // Evita que Laravel redirija al login en rutas API
+        $exceptions->render(function (AuthenticationException $e, Request $request) {
+            return response()->json([
+                'error' => 'No autenticado. Token inválido o no proporcionado.',
+            ], 401);
+        });
     })->create();

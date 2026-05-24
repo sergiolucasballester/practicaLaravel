@@ -9,11 +9,11 @@ use App\Http\Controllers\AuthController;
 // -------------------------------------------------------
 // RUTAS PÚBLICAS (sin autenticación)
 // -------------------------------------------------------
-Route::post('/login', [AuthController::class, 'login']);
-Route::get('/publica', [AuthController::class, 'publica']);
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login',    [AuthController::class, 'login']);
 
 // -------------------------------------------------------
-// RUTAS PROTEGIDAS (requieren token)
+// RUTAS PROTEGIDAS (requieren token Passport)
 // -------------------------------------------------------
 Route::middleware('check.token')->group(function () {
 
@@ -22,33 +22,29 @@ Route::middleware('check.token')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 
     // RUTAS ALUMNO (CRUD básico)
-    Route::get('/alumnos', [AlumnoController::class, 'index']);
-    Route::get('/alumnos/{id}', [AlumnoController::class, 'show']);
-    Route::post('/alumnos', [AlumnoController::class, 'store']);
-    Route::put('/alumnos/{id}', [AlumnoController::class, 'update']);
+    Route::get('/alumnos',       [AlumnoController::class, 'index']);
+    Route::get('/alumnos/{id}',  [AlumnoController::class, 'show']);
+    Route::post('/alumnos',      [AlumnoController::class, 'store']);
+    Route::put('/alumnos/{id}',  [AlumnoController::class, 'update']);
     Route::delete('/alumnos/{id}', [AlumnoController::class, 'destroy']);
 
-    // Relación 1:1 — Obtener el expediente de un alumno
+    // Relación 1:1
     Route::get('/alumnos/{id}/expediente', [AlumnoController::class, 'expediente']);
 
-    // Relación 1:N — Obtener todas las notas de un alumno
+    // Relación 1:N
     Route::get('/alumnos/{id}/notas', [AlumnoController::class, 'notas']);
 
     // RUTAS EXPEDIENTE
-    Route::get('/expedientes', [ExpedienteController::class, 'index']);
-    Route::get('/expedientes/{id}', [ExpedienteController::class, 'show']);
-    Route::post('/expedientes', [ExpedienteController::class, 'store']);
+    Route::get('/expedientes',       [ExpedienteController::class, 'index']);
+    Route::get('/expedientes/{id}',  [ExpedienteController::class, 'show']);
+    Route::post('/expedientes',      [ExpedienteController::class, 'store']);
     Route::delete('/expedientes/{id}', [ExpedienteController::class, 'destroy']);
-
-    // Relación inversa 1:1 — Obtener el alumno de un expediente
     Route::get('/expedientes/{id}/alumno', [ExpedienteController::class, 'alumno']);
 
     // RUTAS NOTA
-    Route::get('/notas', [NotaController::class, 'index']);
-    Route::get('/notas/{id}', [NotaController::class, 'show']);
-    Route::post('/notas', [NotaController::class, 'store']);
+    Route::get('/notas',       [NotaController::class, 'index']);
+    Route::get('/notas/{id}',  [NotaController::class, 'show']);
+    Route::post('/notas',      [NotaController::class, 'store']);
     Route::delete('/notas/{id}', [NotaController::class, 'destroy']);
-
-    // Relación inversa 1:N — Obtener el alumno de una nota
     Route::get('/notas/{id}/alumno', [NotaController::class, 'alumno']);
 });

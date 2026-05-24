@@ -3,31 +3,47 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use App\Models\Alumno;
 
 class AuthController extends Controller
 {
     /**
-     * Ejercicio 1 – Login por nombre y contraseña.
+     * Ejercicio 2 – Registro de usuario.
+     * POST /api/register
+     */
+    public function register(Request $request)
+    {
+        $alumno = new Alumno();
+        $alumno->nombre   = $request->nombre;
+        $alumno->email    = $request->email;
+        $alumno->password = Hash::make($request->password);
+        $alumno->save();
+
+        return response()->json([
+            'mensaje' => 'Alumno registrado correctamente.',
+            'data'    => $alumno,
+        ], 201);
+    }
+
+    /**
+     * Ejercicio 3 – Login por email O nombre y contraseña.
      * POST /api/login
      */
     public function login(Request $request)
     {
-        $alumno = Alumno::where('nombre', $request->nombre)->first();
+        // Buscar por email o por nombre
+        $alumno = Alumno::where('email', $request->input('email'))
+                        ->orWhere('nombre', $request->input('nombre'))
+                        ->first();
 
-        if (!$alumno || $request->password !== $alumno->password) {
+        if (!$alumno || !Hash::check($request->password, $alumno->password)) {
             return response()->json([
                 'error' => 'Credenciales incorrectas.',
             ], 401);
         }
 
-        if ($alumno->tokens()->count() > 0) {
-            return response()->json([
-                'mensaje' => 'El usuario ya está logeado.',
-            ], 200);
-        }
-
-        $token = $alumno->createToken('api-token')->plainTextToken;
+        $token = $alumno->createToken('api-token')->accessToken;
 
         return response()->json([
             'mensaje' => 'Login correcto.',
@@ -36,7 +52,7 @@ class AuthController extends Controller
     }
 
     /**
-     * Ejercicio 3 – Datos del alumno logeado.
+     * Ejercicio 4 – Datos del alumno logeado.
      * GET /api/usuario
      */
     public function usuario(Request $request)
@@ -47,29 +63,15 @@ class AuthController extends Controller
     }
 
     /**
-     * Ejercicio 4 – Cerrar sesión (invalidar token).
+     * Ejercicio 5 – Cerrar sesión borrando TODOS los tokens.
      * POST /api/logout
      */
     public function logout(Request $request)
     {
-        $token = $request->bearerToken();
-        $tokenHash = hash('sha256', $token);
-        
-        \Laravel\Sanctum\PersonalAccessToken::where('token', $tokenHash)->delete();
+        $request->user()->tokens()->delete();
 
         return response()->json([
-            'mensaje' => 'Sesión cerrada correctamente.',
-        ], 200);
-    }
-
-    /**
-     * Ruta pública de ejemplo – Ejercicio 5.
-     * GET /api/publica
-     */
-    public function publica()
-    {
-        return response()->json([
-            'mensaje' => 'Esta ruta es pública, no necesitas estar logeado.',
+            'mensaje' => 'Sesión cerrada correctamente. Todos los tokens eliminados.',
         ], 200);
     }
 }
