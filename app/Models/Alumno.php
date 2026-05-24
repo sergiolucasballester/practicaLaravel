@@ -3,36 +3,28 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Expediente;
+use App\Models\Nota;  
 
 class Alumno extends Model
 {
-    /**
-     * The table associated with the model.
-     *
-     * @var string
-     */
     protected $table = 'alumno';
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'nombre',
-        'telefono',
-        'edad',
-        'password',
         'email',
-        'sexo',
+        'edad',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
-    protected $hidden = [
-        'password',
-    ];
+    // Relación 1:1 — Un alumno tiene un expediente
+    public function expediente()
+    {
+        return $this->hasOne(Expediente::class);
+    }
+
+    // Relación 1:N — Un alumno tiene muchas notas
+    public function notas()
+    {
+        return $this->hasMany(Nota::class);
+    }
 }
