@@ -2,29 +2,26 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use App\Models\Expediente;
-use App\Models\Nota;  
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Laravel\Sanctum\HasApiTokens;
 
-class Alumno extends Model
+class Alumno extends Authenticatable
 {
+    use HasApiTokens, HasFactory;
+
     protected $table = 'alumno';
 
     protected $fillable = [
         'nombre',
-        'email',
+        'telefono',
         'edad',
+        'password',
+        'email',
+        'sexo',
     ];
 
-    // Relación 1:1 — Un alumno tiene un expediente
-    public function expediente()
-    {
-        return $this->hasOne(Expediente::class);
-    }
-
-    // Relación 1:N — Un alumno tiene muchas notas
-    public function notas()
-    {
-        return $this->hasMany(Nota::class);
-    }
+    protected $hidden = [
+        'password',
+    ];
 }

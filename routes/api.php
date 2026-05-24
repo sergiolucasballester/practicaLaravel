@@ -4,44 +4,51 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AlumnoController;
 use App\Http\Controllers\ExpedienteController;
 use App\Http\Controllers\NotaController;
+use App\Http\Controllers\AuthController;
 
 // -------------------------------------------------------
-// RUTAS ALUMNO (CRUD básico)
+// RUTAS PÚBLICAS (sin autenticación)
 // -------------------------------------------------------
-Route::get('/alumnos', [AlumnoController::class, 'index']);
-Route::get('/alumnos/{id}', [AlumnoController::class, 'show']);
-Route::post('/alumnos', [AlumnoController::class, 'store']);
-Route::put('/alumnos/{id}', [AlumnoController::class, 'update']);
-Route::delete('/alumnos/{id}', [AlumnoController::class, 'destroy']);
+Route::post('/login', [AuthController::class, 'login']);
+Route::get('/publica', [AuthController::class, 'publica']);
 
 // -------------------------------------------------------
-// RUTAS DE RELACIÓN — desde Alumno
+// RUTAS PROTEGIDAS (requieren token)
 // -------------------------------------------------------
+Route::middleware('check.token')->group(function () {
 
-// Relación 1:1 — Obtener el expediente de un alumno
-Route::get('/alumnos/{id}/expediente', [AlumnoController::class, 'expediente']);
+    // Auth
+    Route::get('/usuario', [AuthController::class, 'usuario']);
+    Route::post('/logout', [AuthController::class, 'logout']);
 
-// Relación 1:N — Obtener todas las notas de un alumno
-Route::get('/alumnos/{id}/notas', [AlumnoController::class, 'notas']);
+    // RUTAS ALUMNO (CRUD básico)
+    Route::get('/alumnos', [AlumnoController::class, 'index']);
+    Route::get('/alumnos/{id}', [AlumnoController::class, 'show']);
+    Route::post('/alumnos', [AlumnoController::class, 'store']);
+    Route::put('/alumnos/{id}', [AlumnoController::class, 'update']);
+    Route::delete('/alumnos/{id}', [AlumnoController::class, 'destroy']);
 
-// -------------------------------------------------------
-// RUTAS EXPEDIENTE
-// -------------------------------------------------------
-Route::get('/expedientes', [ExpedienteController::class, 'index']);
-Route::get('/expedientes/{id}', [ExpedienteController::class, 'show']);
-Route::post('/expedientes', [ExpedienteController::class, 'store']);
-Route::delete('/expedientes/{id}', [ExpedienteController::class, 'destroy']);
+    // Relación 1:1 — Obtener el expediente de un alumno
+    Route::get('/alumnos/{id}/expediente', [AlumnoController::class, 'expediente']);
 
-// Relación inversa 1:1 — Obtener el alumno de un expediente
-Route::get('/expedientes/{id}/alumno', [ExpedienteController::class, 'alumno']);
+    // Relación 1:N — Obtener todas las notas de un alumno
+    Route::get('/alumnos/{id}/notas', [AlumnoController::class, 'notas']);
 
-// -------------------------------------------------------
-// RUTAS NOTA
-// -------------------------------------------------------
-Route::get('/notas', [NotaController::class, 'index']);
-Route::get('/notas/{id}', [NotaController::class, 'show']);
-Route::post('/notas', [NotaController::class, 'store']);
-Route::delete('/notas/{id}', [NotaController::class, 'destroy']);
+    // RUTAS EXPEDIENTE
+    Route::get('/expedientes', [ExpedienteController::class, 'index']);
+    Route::get('/expedientes/{id}', [ExpedienteController::class, 'show']);
+    Route::post('/expedientes', [ExpedienteController::class, 'store']);
+    Route::delete('/expedientes/{id}', [ExpedienteController::class, 'destroy']);
 
-// Relación inversa 1:N — Obtener el alumno de una nota
-Route::get('/notas/{id}/alumno', [NotaController::class, 'alumno']);
+    // Relación inversa 1:1 — Obtener el alumno de un expediente
+    Route::get('/expedientes/{id}/alumno', [ExpedienteController::class, 'alumno']);
+
+    // RUTAS NOTA
+    Route::get('/notas', [NotaController::class, 'index']);
+    Route::get('/notas/{id}', [NotaController::class, 'show']);
+    Route::post('/notas', [NotaController::class, 'store']);
+    Route::delete('/notas/{id}', [NotaController::class, 'destroy']);
+
+    // Relación inversa 1:N — Obtener el alumno de una nota
+    Route::get('/notas/{id}/alumno', [NotaController::class, 'alumno']);
+});
